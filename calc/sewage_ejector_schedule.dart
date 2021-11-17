@@ -1,3 +1,9 @@
+import 'package:my_app/calc/app_controller.dart';
+import 'package:my_app/calc/charts/helper.dart';
+import 'package:my_app/calc/charts/point.dart';
+import 'package:my_app/calc/pump_data.dart';
+import 'dart:math' as math;
+
 class SewageEjectorSechedule{
 
   List<SewageType> sewageTypeList = [];
@@ -10,44 +16,43 @@ class SewageEjectorSechedule{
     ];
 
     sewageType = sewageTypeList[0];
+    impeller = currentPumpSeries.impellerList.first;
   }
+
   SewageType sewageType = SewageType("", "", -1);
   String tagNum = "1";
   String location = "input location";
   String basinDimension = "input dimension";
-  String manufacture = "XXXXX";
-  String model = "XXXXX";
-  String type = "SOLID HANDLING";
-  String service = "Sewage";
-  double gpm = 0;
-  double headPressure = 0;
-  String bHousePower = "XX";
-  String volTage = "208V";
-  String phase = "3";
-  String amps = "XX";
+  String manufacture = "Barnes"; // It's always Barnes
+  String typePump = "Solids Handling";
+  Pump  currentPumpSeries = AppController.pumpData.pumpList.first;
+  PumpElectricDetails  currentPumpModel = AppController.pumpData.pumpList.first.subModels.first;
+  double pumpRate = -1;
+  double hn = -1;
   double cableLength = 0;
   double minPumpstart = 6; //in minutes;
   double calculatedPumpStart = 0;
   double pipeOutVelocity = 0;
+  Impeller impeller = Impeller();
+
+  Map<double, double> systemCurve = {};
 
   final _sewageTypeStr = "SewageType";
   final _tagNumStr = "TagNum";
   final _locationStr = "Location";
   final _basinDimensionStr = "BasinDimension";
   final _manufactureStr = "Manufacture";
-  final _modelStr = "Model";
-  final _typeStr = "Type";
-  final _serviceStr = "Service";
-  final _gpmStr = "Gpm";
-  final _headPressureStr = "HeadPressure";
-  final _bHousePowerStr = "B_HousePower";
-  final _volTageStr = "Voltage";
-  final _phaseStr = "Phase";
-  final _ampsStr = "Amps";
+  final _currentPumpSeriesStr = "currentPumpSeries";
+  final _currentPumpModelStr = "currentPumpModel";
+  final _pumpRateStr = "pumpRate";
+  final _hnStr = "hnStr";
+  final _typePumpStr = "typePump";
   final _cableLengthStr = "CableLength";
   final _minPumpstartStr = "MinPumpstart";
   final _calculatedPumpStartStr = "CalculatedPumpStart";
   final _pipeOutVelocityStr = "pipeOutVelocity";
+  final _currentImpellerDiaStr = "currentImpellerDia";
+
 
 
   Map<String, dynamic> toMap(){
@@ -57,42 +62,119 @@ class SewageEjectorSechedule{
       _locationStr: location,
       _basinDimensionStr: basinDimension,
       _manufactureStr: manufacture,
-      _modelStr: model,
-      _typeStr: type,
-      _serviceStr: service,
-      _gpmStr: gpm,
-      _headPressureStr: headPressure,
-      _bHousePowerStr: bHousePower,
-      _volTageStr: volTage,
-      _phaseStr: phase,
-      _ampsStr: amps,
+      _currentPumpSeriesStr: currentPumpSeries.toMap(),
+      _currentPumpModelStr : currentPumpModel.toMap(),
+      _pumpRateStr : pumpRate,
+      _hnStr : hn,
+      _typePumpStr : typePump,
       _cableLengthStr: cableLength,   
       _minPumpstartStr: minPumpstart,
       _calculatedPumpStartStr : calculatedPumpStart,
       _pipeOutVelocityStr : pipeOutVelocity,
+      _currentImpellerDiaStr : impeller.toMap(),
     };
   }
 
   void fromMap(Map<String, dynamic> map){
-    sewageType.fromMap(map[_sewageTypeStr] as Map<String, dynamic>);
+    sewageType = sewageType.fromMap(map[_sewageTypeStr] as Map<String, dynamic>)!;
     tagNum = map[_tagNumStr];
     location = map[_locationStr];
     basinDimension = map[_basinDimensionStr];
     manufacture = map[_manufactureStr];
-    model = map[_modelStr];
-    type = map[_typeStr];
-    service = map[_serviceStr];
-    gpm = map[_gpmStr];
-    headPressure = map[_headPressureStr];
-    bHousePower = map[_bHousePowerStr];
-    volTage = map[_volTageStr];
-    phase = map[_phaseStr];
-    amps = map[_ampsStr];
+    typePump = map[_typePumpStr];
     cableLength = map[_cableLengthStr];
     minPumpstart = map[_minPumpstartStr];
     calculatedPumpStart = map[calculatedPumpStart];
     pipeOutVelocity = map[_pipeOutVelocityStr];
+    pumpRate = map[_pumpRateStr];
+    hn = map[_hnStr];
+
+    Map<String, dynamic>  _currentPumpSeries = map[_currentPumpSeriesStr];
+    currentPumpSeries = currentPumpSeries.fromMap(_currentPumpSeries)!;
+
+    impeller = impeller.fromMap(map[_currentImpellerDiaStr], currentPumpSeries)!;
+
+    Map<String, dynamic> _currentPumpModel = map[_currentPumpModelStr];
+    currentPumpModel = currentPumpModel.fromMap(_currentPumpModel, currentPumpSeries)!;
   }
+
+  void reCalculate(){
+    getPumpRate();
+    getPipeOutVelocity();
+    getPumpRecyclingTime();
+  }
+
+  void getPumpRecyclingTime(){
+    if(AppController.structInfo.inflow != 0){
+      calculatedPumpStart = AppController.structInfo.useableVolume/(pumpRate - AppController.structInfo.inflow) + pumpRate/AppController.structInfo.inflow;
+    }else{
+      calculatedPumpStart = 0;
+    }
+  }
+
+  void getPipeOutVelocity(){
+    if(pumpRate != -1 && AppController.sewageCalc.diameter != 0){
+      pipeOutVelocity = 
+        (AppController.structInfo.useableVolume/(7.48*60))/
+        (math.pi/(4*math.pow(AppController.sewageCalc.diameter/12, 2)));
+    }
+  }
+
+  void getPumpRate(){
+    _getSystemCurveList();
+    Point? temp = Helper.getInterSecionOf2Map(systemCurve, impeller.feetGal);
+    if(temp != null){
+      pumpRate = temp.x;
+      hn = temp.y - AppController.structInfo.useableVolumeH;
+    }else{
+      pumpRate = -1;
+      hn = -1;
+    }
+  }
+
+  void _getSystemCurveList(){
+    systemCurve.clear();
+
+    double highest = impeller.feetGal.keys.last;
+    double lowest = impeller.feetGal.keys.first;
+    if(lowest < 0) lowest = 0;
+
+    var step = lowest;
+    double endPoint = 0;
+
+    while(highest > step){
+      systemCurve[step] = _getHn(step);
+      if(systemCurve[step] == -1){
+        systemCurve.clear(); return;
+      }
+      endPoint = step + 2;
+      if(endPoint >= highest){
+        step = highest;
+        systemCurve[step] = _getHn(step);
+        if(systemCurve[step] == -1){
+          systemCurve.clear(); return;
+        }
+        break;
+      }else{
+        step = endPoint;
+      }
+    }
+  }
+
+  double _getHn(double q){
+    if(AppController.sewageCalc.diameter != 0 && AppController.sewageCalc.C != 0) {
+      return
+     (
+      (10.51*math.pow(q, 1.85))/
+      (math.pow(AppController.sewageCalc.C, 1.85)*math.pow(AppController.sewageCalc.diameter , 4.87))
+      )*AppController.sewageCalc.totalLength +
+      AppController.structInfo.useableVolumeH;
+    }else{
+      return -1;
+    }
+  }
+
+
 }
 
 class SewageType{
@@ -100,23 +182,27 @@ class SewageType{
   String tag;
   double minVelocity;
 
-  String nameStr = "name";
-  String tagStr = "tag";
-  String minVelocityStr = "minVelocity";  
+  final String _nameStr = "name";
+  final String _tagStr = "tag";
+  final String _minVelocityStr = "minVelocity";  
 
   SewageType(this.name, this.tag, this.minVelocity);
 
   Map<String, dynamic> toMap(){
     return {
-      nameStr : name,
-      tagStr : tag,
-      minVelocityStr : minVelocity
+      _nameStr : name,
+      _tagStr : tag,
+      _minVelocityStr : minVelocity
     };
   }
 
-  void fromMap(Map<String, dynamic> map){
-    name = map[nameStr];
-    tag = map[tagStr];
-    minVelocity = map[minVelocityStr];
+  SewageType? fromMap(Map<String, dynamic> map){
+    name = map[_nameStr];
+    tag = map[_tagStr];
+    for (var element in AppController.sewageES.sewageTypeList) {
+      if(element.name == name && element.tag == tag){
+        return element;
+      }
+    }
   }
 }

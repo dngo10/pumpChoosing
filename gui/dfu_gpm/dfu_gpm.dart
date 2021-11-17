@@ -42,7 +42,10 @@ class _DfuToGpm extends State<DfuToGpm>{
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("equals: ${AppController.inputInfo.gpmConverted} gpm"),
-                ElevatedButton(onPressed: (){AppController.inputInfo.inflowCtrl.text = AppController.inputInfo.gpmConverted;}, child: const Text("Use")),
+                ElevatedButton(
+                  onPressed: (){AppController.inputInfo.inflowCtrl.text = AppController.inputInfo.gpmConverted; AppController.inputInfo.onInflowchange(AppController.inputInfo.gpmConverted);}, 
+                  child: const Text("Use")
+                ),
               ],
             )
           ],

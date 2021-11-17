@@ -16,7 +16,7 @@ class _TopTab extends State<TopTab>{
   @override
   Widget build(BuildContext context) {
     return  
-      Consumer<InputInfo>(builder: (context, cart, child) => DefaultTabController(
+      DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
@@ -39,7 +39,6 @@ class _TopTab extends State<TopTab>{
           },
           child: const Icon(Icons.auto_graph),),
       )
-    )
     );
   }
 

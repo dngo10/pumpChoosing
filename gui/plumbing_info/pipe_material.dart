@@ -24,10 +24,9 @@ class _PipeMaterial extends State<PipeMaterial>{
         );
       }).toList(),
       onChanged: (val){
-        AppController.inputInfo.materialType = val as String;
-        AppController.inputInfo.onMaterialTypeChange(val);
+        AppController.inputInfo.onMaterialTypeChange(val as String);
       },
-      value: AppController.inputInfo.materialType
+      value: AppController.sewageCalc.material
       ),
     );
   }

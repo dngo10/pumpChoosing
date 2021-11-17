@@ -1,9 +1,10 @@
 
+import 'package:my_app/calc/hazen_william.dart';
 import 'package:my_app/calc/unit_convert.dart';
 
 class SewageEjectorCalculation{
-  String material = "";
-  double C = 0;
+  String material = HazenWilliam.hw.keys.first;
+  double C = HazenWilliam.hw.values.first;
   double diameter = 0;
   double inletGpm = 0;
   double staticHead = 0;
@@ -22,6 +23,11 @@ class SewageEjectorCalculation{
            numofCheckValve*UnitConvert.backWaterValve[diameter]! +
            numofGateValve*UnitConvert.gateValve[diameter]!;
     return equivalentPipeLength;
+  }
+
+  double getTotalLength(){
+    totalLength = equivalentPipeLength + pipeLength;
+    return totalLength;
   }
 
 }

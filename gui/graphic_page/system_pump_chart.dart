@@ -7,6 +7,7 @@ class SystemPumpChart extends StatelessWidget{
   Widget build(BuildContext context) {
     ListChartSeries lcs = ListChartSeries();
 
+
     List<charts.Series<DataSeries, double>> series = [
       charts.Series(
         id: "developers",
@@ -72,15 +73,15 @@ class ListChartSeries{
   List<DataSeries> data1 = [];
 
   ListChartSeries(){
-    Map<double, double> temp = AppController.pumpData.pumpList.first.impellerList.first.feetGal;
-    temp.forEach((key, value) {
-      DataSeries ds = DataSeries(key, value, charts.ColorUtil.fromDartColor(Colors.green));
+    Map<double, double> pumpCurve = AppController.sewageES.impeller.feetGal;
+    pumpCurve.forEach((key, value) {
+      DataSeries ds = DataSeries(key, value, charts.ColorUtil.fromDartColor(Colors.blue));
       data.add(ds);
     });
 
-    Map<double, double> temp1 = AppController.pumpData.pumpList.first.impellerList[1].feetGal;
-    temp1.forEach((key, value) {
-      DataSeries ds = DataSeries(key, value, charts.ColorUtil.fromDartColor(Colors.red));
+    Map<double, double> systemCurve = AppController.sewageES.systemCurve;
+    systemCurve.forEach((key, value) {
+      DataSeries ds = DataSeries(key, value, charts.ColorUtil.fromDartColor(Colors.brown));
       data1.add(ds);
     });
   }

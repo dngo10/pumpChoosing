@@ -1,4 +1,4 @@
-
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:my_app/calc/primitive_element.dart';
@@ -20,6 +20,7 @@ class StructuralInfo{
   final Double1 _surfaceThickness = Double1(); //inches
   final Double1 _baseThickness = Double1(); //inches
   final Double1 _baseInnerDiameterW = Double1(); //feet
+  final Double1 _floorArea = Double1();
   final Double1 _baseWallThickness = Double1();
 
   final Double1 _lowLevel = Double1();  //inches
@@ -34,6 +35,7 @@ class StructuralInfo{
   final Double1 _valBoxSeaLevel = Double1(); //feet
   final Double1 _baseSeaLevel = Double1(); // feet
   final Double1 _pipeOutLetSeaLevel = Double1();
+  final Double1 _pipeOutToSurfaceHeight = Double1();
 
   final Double1 _cordLength = Double1(); //feet
   final Double1 _useableVolumeH = Double1();  //feet
@@ -43,8 +45,9 @@ class StructuralInfo{
   final Double1 _inletToSurface = Double1();
   final Double1 _staticHead = Double1();
 
-  String baseShape = "";
-  String valveBoxShape = "";
+  String baseShape = "square";
+  String valveBoxShape = "square";
+  double flexibleHeight = 0;
 
   StringBuffer errorMessage = StringBuffer();
 
@@ -53,6 +56,7 @@ class StructuralInfo{
   double get surfaceThickness{return _surfaceThickness.get();}
   double get baseThickness{return _baseThickness.get();}
   double get baseInnerDiameterW {return _baseInnerDiameterW.get();} //feet
+  double get floorArea{return _floorArea.get();}
   double get baseWallThickness {return _baseWallThickness.get();}
   double get lowLevel {return _lowLevel.get();}
   double get lagPumpFloatHeight {return _lagPumpFloatHeight.get();}
@@ -65,7 +69,8 @@ class StructuralInfo{
   double get pipeOutSeaLevel {return _pipeOutSeaLevel.get();} //Used for static head
   double get valBoxSeaLevel {return _valBoxSeaLevel.get();} 
   double get baseSeaLevel {return _baseSeaLevel.get();}
-  double get pipeOutLetSeaLevel {return _pipeOutLetSeaLevel.get();} // Sealevel where pipe geting out of basin
+  double get basinOutLetSeaLevel {return _pipeOutLetSeaLevel.get();} // Sealevel where pipe geting out of basin
+  double get pipeOutToSurfaceHeight {return _pipeOutToSurfaceHeight.get();}
 
   double get cordLength {return _cordLength.get();} // Input from user
 
@@ -82,6 +87,7 @@ class StructuralInfo{
   set surfaceThickness(double value){_surfaceThickness.set(value);}
   set baseThickness(double value){_baseThickness.set(value);}
   set baseInnerDiameterW(double value) {_baseInnerDiameterW.set(value);}
+  set floorArea(double value){_floorArea.set(value);}
   set lagPumpFloatHeight(double value) {_lagPumpFloatHeight.set(value);}
   set alarmToInletHeight(double value) {_alarmToInletHeight.set(value);}
   set valveBoxW(double value) { _valveBoxW.set(value);}
@@ -89,7 +95,8 @@ class StructuralInfo{
   set inletSeaLevel(double value) {_inletSeaLevel.set(value);}
   set surfaceSeaLevel(double value) {_surfaceSeaLevel.set(value);}
   set pipeOutSeaLevel(double value) {_pipeOutSeaLevel.set(value);}
-  set pipeOutLetSeaLevel (double value) {_pipeOutLetSeaLevel.set(value);}
+  set basinOutLetSeaLevel (double value) {_pipeOutLetSeaLevel.set(value);}
+  set pipeOutToSurfaceHeight (double value){ _pipeOutToSurfaceHeight.set(value);}
 
   //SET CALCULATED VALUE
 
@@ -103,10 +110,29 @@ class StructuralInfo{
   set staticHead(double value) {_staticHead.set(value);}
   set valBoxSeaLevel(double value){_valBoxSeaLevel.set(value);}
   set baseWallThickness(double value) {_baseWallThickness.set(value);}
+
   
   StructuralInfo(){
     baseShape = baseShapeList[0];
     valveBoxShape = valveBoxList[0];
+    _alarmToInletHeight.set(2);
+    _lagPumpFloatHeight.set(12);
+  }
+
+  void recalculateData(){
+    _floorArea.set(_baseArea());
+    _getUsableVolume();
+    _getUseableLength();
+    _getHeightFromInletToSurface();
+    _getBasinDepth();
+    _getBaseSeaLevel();
+    _getBasinFloorSeaLevel();
+    _getTotalStructureHeight();
+    _getStaticHead();
+    _getBoxSeaLevel();
+    _getBaseSeaLevel();
+    _getPipeOutOfBasinToCover();
+    _getValBoxHeight();
   }
 
   //Calculation
@@ -147,10 +173,9 @@ class StructuralInfo{
     String err = "Get Useable Volume Length";
 
     if(_useableVolume.isValid()){
-      double baseArea = _baseArea();
-      if(baseArea > 0){
+      if(_floorArea.isValid()){
         double valueCubicFeet = UnitConvert.galonToCubicFeet(_useableVolume.get());
-        _useableVolumeH.set(valueCubicFeet/baseArea);
+        _useableVolumeH.set(valueCubicFeet/_floorArea.get());
         return _useableVolumeH.get();
       }else{
         errorMessage.writeln("$err, Can't Get Base Area");
@@ -192,13 +217,21 @@ class StructuralInfo{
         if(_alarmToInletHeight.isValid()){
           if(_inletToSurface.isValid()){
             if(_surfaceThickness.isValid()){
-              _basinDepth.set(UnitConvert.inchToFeet(_lowLevel.get()) + 
+              double temp = UnitConvert.inchToFeet(_lowLevel.get()) + 
                               _useableVolumeH.get() + // feet already
                               UnitConvert.inchToFeet(_alarmToInletHeight.get()) +
                               _inletToSurface.get() - // Minus Surface thickness
-                              UnitConvert.inchToFeet(_surfaceThickness.get())
-                              );
+                              UnitConvert.inchToFeet(_surfaceThickness.get());
+
+              double roudUp =  (temp*2).ceil().toDouble(); //Round up the half feet, so we time 2 to easier round.
+
+              _basinDepth.set(roudUp/2);
+
               if(_basinDepth.isValid()){
+                flexibleHeight = UnitConvert.feetToInch(roudUp/2 - temp);
+                if(flexibleHeight < 0){
+                  flexibleHeight = 0;
+                }
                 return _basinDepth.get();
               }else{
                 errorMessage.writeln("$err, Basin Depth is 0 or negative.");
@@ -268,7 +301,7 @@ class StructuralInfo{
                               UnitConvert.inchToFeet(_surfaceThickness.get())
           );
           if(!_structureHeight.isValid()){
-            errorMessage.writeln("$totalHeightErr, Total height is negative.");
+            errorMessage.writeln("$totalHeightErr, Total height is 0 or negative.");
             return 0;
           }else{
             return _structureHeight.get();
@@ -349,6 +382,34 @@ class StructuralInfo{
     }
   }
 
+  double _getValBoxHeight(){
+    String err = "Get ValveBox height err";
+
+    if(_valBoxSeaLevel.isValid()){
+      if(_surfaceSeaLevel.isValid()){
+        if(_surfaceThickness.isValid()){
+          _valveBoxH.set(
+            _surfaceSeaLevel.get() -
+            _valBoxSeaLevel.get() -
+            UnitConvert.inchToFeet(_surfaceThickness.get())
+          );
+          if(_valveBoxH.isValid()){
+            return _valveBoxH.get();
+          }else{
+            errorMessage.writeln("$err, valve box height is zero or negative");
+          }
+        }else{
+          errorMessage.writeln("$err, surface thickness is not valid");
+        }
+      }else{
+        errorMessage.writeln("$err, surface sea level is not valid");
+      }
+    }else{
+      errorMessage.writeln("$err, valve box sea level is not valid");
+    }
+    return 0;
+  }
+
   double _getBaseSeaLevel(){
     String err = "Get Base Sea Level Error";
     if(_basinDepth.isValid()){
@@ -379,30 +440,61 @@ class StructuralInfo{
       return 0;
     }
   }
-  
-  void _helper1(){
-    if(_baseArea() != 0){
-      if(_getUseableLength() != 0){
-        if(_getBasinDepth() != 0){
-          if(_getTotalStructureHeight() != 0){}
-          if(_getStaticHead() != 0){}
-          if(_getBaseSeaLevel() != 0){}
+
+  double _getPipeOutOfBasinToCover(){
+    String err = "_getPipeOutOfBasinToCover Err";
+
+    if(_surfaceSeaLevel.isValid()){
+      if(_pipeOutLetSeaLevel.isValid()){
+        if(_surfaceThickness.isValid()){
+          _pipeOutToSurfaceHeight.set(
+            _surfaceSeaLevel.get() -
+            _pipeOutLetSeaLevel.get() -
+            UnitConvert.inchToFeet(_surfaceThickness.get())
+          );
+          if(_pipeOutToSurfaceHeight.isValid()){
+            return _pipeOutToSurfaceHeight.get();
+          }else{
+            errorMessage.writeln("$err, _pipeOutToSurfaceHeight not valid");
+            return 0;
+          }
+        }else{
+          errorMessage.writeln("$err, surface thickness not valid");
+          return 0;
         }
+      }else{
+        errorMessage.writeln("$err, pipeOutLetSeaLevel not valid");
+        return 0;
       }
+    }else{
+      errorMessage.writeln("$err, surface Sea Level not valid");
+      return 0;
     }
   }
+  
+  //void _helper1(){
+  //  if(_baseArea() != 0){
+  //    if(_getUseableLength() != 0){
+  //      if(_getBasinDepth() != 0){
+  //        if(_getTotalStructureHeight() != 0){}
+  //        if(_getStaticHead() != 0){}
+  //        if(_getBaseSeaLevel() != 0){}
+  //      }
+  //    }
+  //  }
+  //}
 
-  void _helper2(){
-    if(_getBasinDepth() != 0){
-      if(_getTotalStructureHeight() != 0){}
-      if(_getStaticHead() != 0){}
-      if(_getBaseSeaLevel() != 0){}
-    }
-  }
+  //void _helper2(){
+  //  if(_getBasinDepth() != 0){
+  //    if(_getTotalStructureHeight() != 0){}
+  //    if(_getStaticHead() != 0){}
+  //    if(_getBaseSeaLevel() != 0){}
+  //  }
+  //}
 
-  void _helper3(){
-    if(_getHeightFromInletToSurface() != 0){
-      _helper2();
-    }
-  }
+  //void _helper3(){
+  //  if(_getHeightFromInletToSurface() != 0){
+  //    _helper2();
+  //  }
+  //}
 }

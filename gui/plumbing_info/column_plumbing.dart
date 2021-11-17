@@ -62,7 +62,7 @@ class _ColumnPlumbing extends State<ColumnPlumbing>{
               DropdownButton(items: AppController.structInfo.baseShapeList.map<DropdownMenuItem<String>>((e){
                   return DropdownMenuItem(child: Text(e), value: e,);
                 }).toList(),
-                value : AppController.inputInfo.basinShape,
+                value : AppController.structInfo.baseShape,
                 onChanged: (e){
                   AppController.inputInfo.onBasinShapeChange(e as String);
                 },
@@ -74,8 +74,8 @@ class _ColumnPlumbing extends State<ColumnPlumbing>{
               ),
               GeneralInput("ft", "[G] inlet sea level", AppController.inputInfo.inletSeaLevelCtrl, "Sea level of pipe getting into basin", AppController.inputInfo.onInletSeaLevelChange),
               GeneralInput("ft", "[J] surface sea level", AppController.inputInfo.finishedSurfaceSeaLevelCtrl, "Surface sea level", AppController.inputInfo.onSurfaceSeaLevelChange),
-              GeneralInput("ft", "[L] pipe out of basin sea level", AppController.inputInfo.outletSeaLevelCtrl, "Sea level of pipe geting out of basin", AppController.inputInfo.onPipeOutletSeaLevelChange),
-              GeneralInput("ft", "[Q] pipe outlet ended sea level", AppController.inputInfo.pipeOutSeaLevelCtrl, "Sea level of the end if pipe outlet, we use this to calculate static head", AppController.inputInfo.onPipeEndSeaLevelChange),
+              GeneralInput("ft", "[L] pipe out of basin sea level", AppController.inputInfo.basinOutSeaLevelCtrl, "Sea level of pipe geting out of basin", AppController.inputInfo.onBasinOutletSeaLevelChange),
+              GeneralInput("ft", "[Q] pipe outlet ended sea level", AppController.inputInfo.outletSeaLevelCtrl, "Sea level of the end if pipe outlet, we use this to calculate static head", AppController.inputInfo.onPipeEndSeaLevelChange),
               Padding(
                 padding: const EdgeInsets.only(top: 30.0),
                 child: TitleText("Valve Box Input"),
@@ -96,20 +96,20 @@ class _ColumnPlumbing extends State<ColumnPlumbing>{
                     value: e,
                   );
                 }).toList(),
-                value: AppController.inputInfo.currentPumpSeries,
+                value: AppController.sewageES.currentPumpSeries,
                 onChanged: (pump){
                   AppController.inputInfo.onSeriesBoxChange(pump as Pump);
                 },
               ),
 
               DropdownButton(items: 
-                AppController.inputInfo.currentPumpSeries.subModels.map<DropdownMenuItem<PumpElectricDetails>>((e){
+                AppController.sewageES.currentPumpSeries.subModels.map<DropdownMenuItem<PumpElectricDetails>>((e){
                   return DropdownMenuItem(child: 
                     SizedBox(child: Text(e.model), width: 175),
                     value: e,
                   );
                 }).toList(),
-                value: AppController.inputInfo.currentPumpModel,
+                value: AppController.sewageES.currentPumpModel,
                 onChanged: (model){
                   AppController.inputInfo.onSubModelBoxChange(model as PumpElectricDetails);
                 },
@@ -150,7 +150,7 @@ class _ColumnPlumbing extends State<ColumnPlumbing>{
                   child: ButtonTheme(
                       child: ElevatedButton(
                               child: const Text("Calculate Other Values"),
-                              onPressed: (){},
+                              onPressed: (){ AppController.inputInfo.onRecalculateButtonPress();},
                             )
                   ),
                 ),
@@ -176,8 +176,6 @@ class _ColumnPlumbing extends State<ColumnPlumbing>{
               GeneralInput("ft", "[R] static head", AppController.inputInfo.staticHeadCtrl, "Static Head", AppController.inputInfo.onStaticHeadChange),
               GeneralInput("ft", "[K] out pipe to finished surface", AppController.inputInfo.outPipeToFinishedSurfaceCtrl, "Distance from pipe just going out of basin to surface", AppController.inputInfo.onOutPipeToSurfaceChange),
               GeneralInput("in", "[O] valve box depth", AppController.inputInfo.valveBoxDepthCtrl, "Valve Box Depth", AppController.inputInfo.onValveBoxDepthChange),
-              GeneralInput("ft/s", "pipe out velocity", AppController.inputInfo.pipeOutVelocityCtrl, "Velocity of outlet water", AppController.inputInfo.pipeOutVelocityChange),
-              GeneralInput("min", "Pump Cycling time", AppController.inputInfo.pumpRecyclingCtrl, "Calculated Pump Recycling Time", AppController.inputInfo.onPumpRecyclingChange),
             ]
           ),
 

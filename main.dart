@@ -3,13 +3,14 @@ import 'package:my_app/calc/app_controller.dart';
 import 'package:my_app/gui/toptab.dart';
 import 'package:provider/provider.dart';
 
+import 'calc/class_input.dart';
+
 void main() {
   runApp(
-    MultiProvider(providers: [
-      ChangeNotifierProvider(create: (context) => AppController.inputInfo)
-    ],
-    child: MyApp()
-    )
+    MultiProvider(providers: [ChangeNotifierProvider(create: (context) => AppController.inputInfo)],
+      child: Consumer<InputInfo>(builder: (context, cart, child) => MyApp()
+      )
+    ) 
   );
 }
 

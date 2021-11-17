@@ -1,7 +1,14 @@
+import 'package:my_app/calc/app_controller.dart';
+
 class PumpData{
   List<Pump> pumpList = [];
 
   PumpData(){
+    _initModel();
+
+  }
+
+  void _initModel(){
     Pump barnes2SEL = Pump.newPump("Barnes", "2SE-L", 19.02);
     barnes2SEL.subModels = [
     PumpElectricDetails("SE51", "0.5" ,"120", "1", "11.6"),
@@ -338,6 +345,39 @@ class Pump{
   List<Impeller> impellerList = [];
 
   Pump.newPump(this.brand, this.model, this.lowlevel);
+
+  final _brandStr = "brand";
+  final _modelStr = "model";
+  final _lowLevelStr = "lowLevel";
+  final _typeStr = "type";
+
+
+
+  Map<String, dynamic> toMap(){
+    return {
+      _brandStr : brand,
+      _modelStr : model,
+      _lowLevelStr : lowlevel,
+      _typeStr : type
+    };
+  }
+
+  Pump? fromMap(Map<String, dynamic> map){
+    brand = map[_brandStr];
+    model = map[_modelStr];
+    lowlevel = map[_lowLevelStr];
+    type = map[_typeStr];
+
+    subModels.clear();
+    impellerList.clear();
+
+    for(Pump pump in AppController.pumpData.pumpList){
+      if(pump.brand == brand && model == pump.model){
+        return pump;
+      }
+    }
+    return null;
+  }
 }
 
 
@@ -347,20 +387,68 @@ class PumpElectricDetails{
   String voltage = "";
   String phase = "";
   String amps = "";
-  double impellerDia = -1;
 
   PumpElectricDetails(this.model, this.hp, this.voltage, this.phase, this.amps);
+
+  PumpElectricDetails.blank();
+
+  final _modelStr = "model";
+  final _hpStr = "hp";
+  final _voltageStr = "voltage";
+  final _phaseStr = "phase";
+  final _ampsStr = "amps";
+
+  Map<String, dynamic> toMap(){
+    return {
+      _modelStr : model,
+      _hpStr : hp,
+      _voltageStr : voltage,
+      _phaseStr : phase,
+      _ampsStr : amps,
+    };
+  }
+
+  PumpElectricDetails? fromMap(Map<String, dynamic> map, Pump currentPump){
+    model = map[_modelStr];
+    hp = map[_hpStr];
+    voltage = map[_voltageStr];
+    phase = map[_phaseStr];
+    amps = map[_ampsStr];
+
+    for (var item in currentPump.subModels) {
+      if(model == item.model){
+        return item;
+      }
+    }
+
+    return null;
+  }
+
+  void copy(PumpElectricDetails eDetails){
+      model = eDetails.model;
+      hp = eDetails.hp;
+      voltage = eDetails.voltage;
+      phase = eDetails.phase;
+      amps = eDetails.amps; // Continue Here
+  }
 }
 
 class Impeller{
   double impellerDia = 0;
-  Map<double,double> feetGal;
+  Map<double,double> feetGal = {};
 
   String impellerDiaStr = "impellerDia";
   String feetGalStr = "feetGal";
 
+  Impeller();
+
   Impeller.newImpeller(double dia, this.feetGal){
     impellerDia = dia;
+  }
+
+  void copy(Impeller imp){
+    impellerDia = imp.impellerDia;
+    feetGal.addAll(imp.feetGal);
   }
 
   Map<String, dynamic> toMap(){
@@ -370,8 +458,13 @@ class Impeller{
     };
   }
 
-  void fromMap(Map<String, dynamic> map){
+  Impeller? fromMap(Map<String, dynamic> map, Pump pump){
     impellerDia = map[impellerDiaStr];
-    feetGalStr = map[feetGalStr];
+    for (var element in pump.impellerList) {
+      if(impellerDia == element.impellerDia){
+        return element;
+      }
+    }
+    return null;
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/gui/graphic_page/system_pump_chart.dart';
+import 'package:my_app/calc/class_input.dart';
+import 'package:my_app/gui/graphic_page/system_curve.dart';
+import 'package:provider/provider.dart';
 
 class GraphicPage extends StatefulWidget{
   @override
@@ -12,7 +14,7 @@ class GraphicPage extends StatefulWidget{
 class _GraphicPage extends State<GraphicPage>{
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    return Consumer<InputInfo>(builder: (context, cart, child) => DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
@@ -26,17 +28,13 @@ class _GraphicPage extends State<GraphicPage>{
         ),
         body: TabBarView(
           children: [
-            Column(
-              children: [
-                const Text("Chart"),
-                Expanded(child: SystemPumpChart(),)
-              ],
-            ),
+            SystemCurve(),
             const Icon(Icons.directions_transit),
             const Icon(Icons.directions_bike),
           ]
         ),
       ),
+    )
     );
   }
 
