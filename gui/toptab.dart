@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/calc/class_input.dart';
-import 'package:my_app/gui/graphic_page/graphic_page.dart';
+import 'package:my_app/gui/graphic_page/graphic_page_main.dart';
 import 'package:my_app/gui/plumbing_info/column_plumbing.dart';
-import 'package:provider/provider.dart';
 
 class TopTab extends StatefulWidget{
   @override

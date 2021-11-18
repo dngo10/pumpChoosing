@@ -22,8 +22,9 @@ class InputInfo extends ChangeNotifier{
     voltageCtrl.text = AppController.sewageES.currentPumpModel.voltage;
     ampsCtrl.text = AppController.sewageES.currentPumpModel.amps;
     phaseCtrl.text = AppController.sewageES.currentPumpModel.phase;
+    tagNumCtrl.text = AppController.sewageES.tagNum;
+    minPumpStartCtrl.text = nf.format(AppController.sewageES.minPumpstart);
   }
-
 
   TextEditingController inflowCtrl = TextEditingController();
   TextEditingController pipeLengthController = TextEditingController();
@@ -244,7 +245,8 @@ class InputInfo extends ChangeNotifier{
 
   void onImpellerDiaChange(Impeller imp){
     AppController.sewageES.impeller = imp;
-    AppController.sewageES.reCalculate();
+    reCalculateData();
+    //AppController.sewageES.reCalculate();
     pipeOutVelocityCtrl.text = nf.format(AppController.sewageES.pipeOutVelocity);
     pumpRecyclingCtrl.text = nf.format(AppController.sewageES.calculatedPumpStart);
     pumpRateCtrl.text = nf.format(AppController.sewageES.pumpRate);
@@ -382,7 +384,6 @@ class InputInfo extends ChangeNotifier{
 
   void reCalculateData(){
     preData();
-
     onInflowchange(inflowCtrl.text);
     onPipeLengthChange(pipeLengthController.text);
     onPipeDiameterChange(pipeDiameterController.text);
@@ -426,8 +427,7 @@ class InputInfo extends ChangeNotifier{
 
   //This is for Debugging
   void preData(){
-    lowLevelCtrl.text ="12.26";
-    inflowCtrl.text = "200";
+    inflowCtrl.text = "181";
     pipeLengthController.text = "950";
     pipeDiameterController.text = "6";
     elbow45Controller.text = "4";

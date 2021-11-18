@@ -19,20 +19,32 @@ class _SystemCurve extends State<SystemCurve>{
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Container(
+        SizedBox(
           width: 500,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Column(
                 children: [
-                  TitleText("Diameter of impeller"),
-                  const Text("-1 means no option", style: TextStyle(fontStyle: FontStyle.italic),),
+                  TitleText("Pump Check"),
+                  DropdownButton(items: 
+                    AppController.pumpData.pumpList.map<DropdownMenuItem<Pump>>((e){
+                      return DropdownMenuItem(child: 
+                        SizedBox(child: Text(e.model), width: 175),
+                        value: e,
+                      );
+                    }).toList(),
+                    value: AppController.sewageES.currentPumpSeries,
+                    onChanged: (pump){
+                    AppController.inputInfo.onSeriesBoxChange(pump as Pump);
+                    },
+                  ),
+                  const Text("impeller diameter", style: TextStyle(fontStyle: FontStyle.italic),),
                   DropdownButton(
                     items: AppController.sewageES.currentPumpSeries.impellerList.map<DropdownMenuItem<Impeller>>(
                       (impeller){
                         return DropdownMenuItem<Impeller>(
-                          child: Text(impeller.impellerDia.toStringAsFixed(2) + '"'),
+                          child: impeller.impellerDia == -1 ? const Text("No Option") : Text(impeller.impellerDia.toStringAsFixed(2) + '"'),
                           value: impeller
                         );
                       }

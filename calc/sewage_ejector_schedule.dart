@@ -4,6 +4,8 @@ import 'package:my_app/calc/charts/point.dart';
 import 'package:my_app/calc/pump_data.dart';
 import 'dart:math' as math;
 
+import 'package:my_app/calc/unit_convert.dart';
+
 class SewageEjectorSechedule{
 
   List<SewageType> sewageTypeList = [];
@@ -36,6 +38,9 @@ class SewageEjectorSechedule{
   Impeller impeller = Impeller();
 
   Map<double, double> systemCurve = {};
+
+  //This curve is for 1 2 4 5 min graph
+  Map<double, double> pumpRateCurve = {};
 
   final _sewageTypeStr = "SewageType";
   final _tagNumStr = "TagNum";
@@ -102,6 +107,45 @@ class SewageEjectorSechedule{
     getPumpRate();
     getPipeOutVelocity();
     getPumpRecyclingTime();
+    getPumpRateCurve();
+  }
+
+  void getPumpRateCurve(){
+    //For now we use minPumpstart for this equation.
+    //It can be calculatedRecylcing time too, prepare to change.
+    pumpRateCurve.clear();
+    double sumDepth= 2;
+    double maxY = 4*AppController.structInfo.inflow*minPumpstart/
+        (5*AppController.structInfo.floorArea*7.48) +
+        AppController.structInfo.inletToSurface -
+        UnitConvert.inchToFeet(AppController.structInfo.surfaceThickness) +
+        UnitConvert.inchToFeet(
+          AppController.structInfo.alarmToInletHeight +
+          AppController.structInfo.flexibleHeight
+        );
+    maxY = maxY.ceil().toDouble();
+    
+    for(double i = sumDepth; i <= maxY; i+=0.5){
+      double useableVolumeHeight =
+      i -
+      UnitConvert.inchToFeet(
+        AppController.structInfo.lowLevel +
+        AppController.structInfo.alarmToInletHeight +
+        AppController.structInfo.flexibleHeight) -
+      AppController.structInfo.inletToSurface +
+      UnitConvert.inchToFeet(AppController.structInfo.surfaceThickness);
+
+      double usableVolume = AppController.structInfo.floorArea * useableVolumeHeight*7.48;
+
+      double value = usableVolume/
+      (minPumpstart - usableVolume/AppController.structInfo.inflow) + AppController.structInfo.inflow;
+
+      if(value <0 || value > 10*AppController.structInfo.inflow){
+        continue;
+      }else{
+        pumpRateCurve[value] = i;
+      }
+    }
   }
 
   void getPumpRecyclingTime(){
@@ -115,8 +159,10 @@ class SewageEjectorSechedule{
   void getPipeOutVelocity(){
     if(pumpRate != -1 && AppController.sewageCalc.diameter != 0){
       pipeOutVelocity = 
-        (AppController.structInfo.useableVolume/(7.48*60))/
-        (math.pi/(4*math.pow(AppController.sewageCalc.diameter/12, 2)));
+        (pumpRate/(7.48*60))/
+        ((math.pi/4)*math.pow(AppController.sewageCalc.diameter/12, 2));
+    }else{
+      pipeOutVelocity = -1;
     }
   }
 
@@ -125,7 +171,7 @@ class SewageEjectorSechedule{
     Point? temp = Helper.getInterSecionOf2Map(systemCurve, impeller.feetGal);
     if(temp != null){
       pumpRate = temp.x;
-      hn = temp.y - AppController.structInfo.useableVolumeH;
+      hn = temp.y - AppController.structInfo.staticHead;
     }else{
       pumpRate = -1;
       hn = -1;
@@ -168,7 +214,7 @@ class SewageEjectorSechedule{
       (10.51*math.pow(q, 1.85))/
       (math.pow(AppController.sewageCalc.C, 1.85)*math.pow(AppController.sewageCalc.diameter , 4.87))
       )*AppController.sewageCalc.totalLength +
-      AppController.structInfo.useableVolumeH;
+      AppController.structInfo.staticHead;
     }else{
       return -1;
     }

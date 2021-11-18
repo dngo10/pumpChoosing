@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/calc/class_input.dart';
+import 'package:my_app/gui/graphic_page/pump_flow_rate_chart.dart';
 import 'package:my_app/gui/graphic_page/system_curve.dart';
 import 'package:provider/provider.dart';
 
@@ -29,7 +30,7 @@ class _GraphicPage extends State<GraphicPage>{
         body: TabBarView(
           children: [
             SystemCurve(),
-            const Icon(Icons.directions_transit),
+            PumpFlowRateChart(),
             const Icon(Icons.directions_bike),
           ]
         ),

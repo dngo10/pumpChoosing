@@ -47,7 +47,7 @@ class StructuralInfo{
 
   String baseShape = "square";
   String valveBoxShape = "square";
-  double flexibleHeight = 0;
+  double flexibleHeight = 0; //inches
 
   StringBuffer errorMessage = StringBuffer();
 
@@ -89,7 +89,7 @@ class StructuralInfo{
   set baseInnerDiameterW(double value) {_baseInnerDiameterW.set(value);}
   set floorArea(double value){_floorArea.set(value);}
   set lagPumpFloatHeight(double value) {_lagPumpFloatHeight.set(value);}
-  set alarmToInletHeight(double value) {_alarmToInletHeight.set(value);}
+  set alarmToInletHeight(double value) {_alarmToInletHeight.set(value); flexibleHeight = 0;}
   set valveBoxW(double value) { _valveBoxW.set(value);}
   set valveBoxH(double value) {_valveBoxH.set(value);}
   set inletSeaLevel(double value) {_inletSeaLevel.set(value);}
@@ -130,7 +130,6 @@ class StructuralInfo{
     _getTotalStructureHeight();
     _getStaticHead();
     _getBoxSeaLevel();
-    _getBaseSeaLevel();
     _getPipeOutOfBasinToCover();
     _getValBoxHeight();
   }
@@ -140,6 +139,7 @@ class StructuralInfo{
     String areaErr = "Based Area failed";
     if(baseShape == baseShapeList[0]){
       if(_baseInnerDiameterW.isValid()){
+        _floorArea.set(_baseInnerDiameterW.get()*_baseInnerDiameterW.get());
         return _baseInnerDiameterW.get()*_baseInnerDiameterW.get();
       }else{
         errorMessage.writeln("$areaErr, Doesn't have Width value");
@@ -147,6 +147,7 @@ class StructuralInfo{
       }
     }else if(baseShape == baseShapeList[1]){
       if(_baseInnerDiameterW.isValid()){
+        _floorArea.set((_baseInnerDiameterW.get()/2)*(_baseInnerDiameterW.get()/2)*math.pi);
         return (_baseInnerDiameterW.get()/2)*(_baseInnerDiameterW.get()/2)*math.pi;
       }else{
         errorMessage.writeln("$areaErr, doesn't have Diameter value");
@@ -320,19 +321,48 @@ class StructuralInfo{
     }
   }
 
-  double _getStaticHead(){ //Feet
-    String staticHeadError = "Get Static Head Error";
-
+  double _getBaseSeaLevel(){
+    String err = "Get Base Sea Level Error";
     if(_basinDepth.isValid()){
       if(_surfaceThickness.isValid()){
         if(_surfaceSeaLevel.isValid()){
+          _baseSeaLevel.set(
+            _surfaceSeaLevel.get() -
+            (UnitConvert.inchToFeet(_surfaceThickness.get())) -
+            _basinDepth.get()
+          );
+
+          if(_baseSeaLevel.isValid()){
+            return _baseSeaLevel.get();
+          }else{
+            errorMessage.writeln("$err, Base Sea Level is 0 or Negative");
+            return 0;
+          }
+        }else{
+          errorMessage.writeln("$err, SurfaceSeaLevel is not valid");
+          return 0;
+        }
+      }else{
+          errorMessage.writeln("$err, Surface Thickness is not valid");
+          return 0;
+      }
+    }else{
+      errorMessage.writeln("$err, Basin Depth is not valid");
+      return 0;
+    }
+  }
+
+
+  double _getStaticHead(){ //Feet
+    String staticHeadError = "Get Static Head Error";
+
+    if(_baseSeaLevel.isValid()){
+      if(_lowLevel.isValid()){
           if(_pipeOutSeaLevel.isValid()){
             _staticHead.set(
               _pipeOutSeaLevel.get() -
-              _surfaceSeaLevel.get() +
-              UnitConvert.inchToFeet(_surfaceThickness.get())  +
-              _basinDepth.get() -
-              _lowLevel.get()
+              _baseSeaLevel.get() -
+              UnitConvert.inchToFeet(_lowLevel.get())
             );
             if(_staticHead.isValid()){
               return _staticHead.get();
@@ -344,16 +374,12 @@ class StructuralInfo{
             errorMessage.writeln("$staticHeadError, Can't get pipe out sea level");
             return 0;            
           }
-        }else{
-          errorMessage.writeln("$staticHeadError, Can't get surface sea level");
-          return 0;           
-        }
       }else{
-        errorMessage.writeln("$staticHeadError, Can't get surface thickness");
+        errorMessage.writeln("$staticHeadError, Low Level not Valid");
         return 0;           
       }
     }else{
-      errorMessage.writeln("$staticHeadError, Can't get basin depth.");
+      errorMessage.writeln("$staticHeadError, Base Sealevel Not Valid.");
       return 0;        
     }
   }
@@ -410,36 +436,6 @@ class StructuralInfo{
     return 0;
   }
 
-  double _getBaseSeaLevel(){
-    String err = "Get Base Sea Level Error";
-    if(_basinDepth.isValid()){
-      if(_surfaceThickness.isValid()){
-        if(_surfaceSeaLevel.isValid()){
-          _baseSeaLevel.set(
-            _surfaceSeaLevel.get() -
-            (UnitConvert.inchToFeet(_surfaceThickness.get())) -
-            _basinDepth.get()
-          );
-
-          if(_baseSeaLevel.isValid()){
-            return _baseSeaLevel.get();
-          }else{
-            errorMessage.writeln("$err, Base Sea Level is 0 or Negative");
-            return 0;
-          }
-        }else{
-          errorMessage.writeln("$err, SurfaceSeaLevel is not valid");
-          return 0;
-        }
-      }else{
-          errorMessage.writeln("$err, Surface Thickness is not valid");
-          return 0;
-      }
-    }else{
-      errorMessage.writeln("$err, Basin Depth is not valid");
-      return 0;
-    }
-  }
 
   double _getPipeOutOfBasinToCover(){
     String err = "_getPipeOutOfBasinToCover Err";
