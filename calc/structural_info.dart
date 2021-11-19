@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:my_app/calc/primitive_element.dart';
@@ -6,15 +5,8 @@ import 'package:my_app/calc/unit_convert.dart';
 
 
 class StructuralInfo{
-
-  double gpm = -1;
-  double fu = -1;
-  double currentInletGpm = -1;
-
   List<String> baseShapeList = ["square", "circle"];
   List<String> valveBoxList = ["square"];
-
-
 
   final Double1 _inflow = Double1(); //GPM
   final Double1 _surfaceThickness = Double1(); //inches
@@ -34,10 +26,9 @@ class StructuralInfo{
   final Double1 _pipeOutSeaLevel = Double1(); //feet
   final Double1 _valBoxSeaLevel = Double1(); //feet
   final Double1 _baseSeaLevel = Double1(); // feet
-  final Double1 _pipeOutLetSeaLevel = Double1();
+  final Double1 _pipeOutBasinSeaLevel = Double1();
   final Double1 _pipeOutToSurfaceHeight = Double1();
 
-  final Double1 _cordLength = Double1(); //feet
   final Double1 _useableVolumeH = Double1();  //feet
   final Double1 _useableVolume = Double1(); //GALONS
   final Double1 _basinDepth = Double1(); 
@@ -69,10 +60,8 @@ class StructuralInfo{
   double get pipeOutSeaLevel {return _pipeOutSeaLevel.get();} //Used for static head
   double get valBoxSeaLevel {return _valBoxSeaLevel.get();} 
   double get baseSeaLevel {return _baseSeaLevel.get();}
-  double get basinOutLetSeaLevel {return _pipeOutLetSeaLevel.get();} // Sealevel where pipe geting out of basin
+  double get pipeOutBasinSeaLevel {return _pipeOutBasinSeaLevel.get();} // Sealevel where pipe geting out of basin
   double get pipeOutToSurfaceHeight {return _pipeOutToSurfaceHeight.get();}
-
-  double get cordLength {return _cordLength.get();} // Input from user
 
   // All calculated values are in feet or square feet
   double get useableVolumeH {return _useableVolumeH.get();}
@@ -95,7 +84,7 @@ class StructuralInfo{
   set inletSeaLevel(double value) {_inletSeaLevel.set(value);}
   set surfaceSeaLevel(double value) {_surfaceSeaLevel.set(value);}
   set pipeOutSeaLevel(double value) {_pipeOutSeaLevel.set(value);}
-  set basinOutLetSeaLevel (double value) {_pipeOutLetSeaLevel.set(value);}
+  set pipeOutBasinSeaLevel (double value) {_pipeOutBasinSeaLevel.set(value);}
   set pipeOutToSurfaceHeight (double value){ _pipeOutToSurfaceHeight.set(value);}
 
   //SET CALCULATED VALUE
@@ -103,13 +92,13 @@ class StructuralInfo{
   set lowLevel(double value) {_lowLevel.set(value);}
   set useableVolumeH(double value) {_useableVolumeH.set(value);}
   set useableVolume(double value) {_useableVolume.set(value);}
-  set cordLength(double value) {_cordLength.set(value);}
   set basinDepth(double value) {_basinDepth.set(value);}
   set structureHeight(double value) {_structureHeight.set(value);}
   set inletToSurface(double value) {_inletToSurface.set(value);}
   set staticHead(double value) {_staticHead.set(value);}
   set valBoxSeaLevel(double value){_valBoxSeaLevel.set(value);}
   set baseWallThickness(double value) {_baseWallThickness.set(value);}
+  set baseSeaLevel(double value){ _baseSeaLevel.set(value);}
 
   
   StructuralInfo(){
@@ -441,11 +430,11 @@ class StructuralInfo{
     String err = "_getPipeOutOfBasinToCover Err";
 
     if(_surfaceSeaLevel.isValid()){
-      if(_pipeOutLetSeaLevel.isValid()){
+      if(_pipeOutBasinSeaLevel.isValid()){
         if(_surfaceThickness.isValid()){
           _pipeOutToSurfaceHeight.set(
             _surfaceSeaLevel.get() -
-            _pipeOutLetSeaLevel.get() -
+            _pipeOutBasinSeaLevel.get() -
             UnitConvert.inchToFeet(_surfaceThickness.get())
           );
           if(_pipeOutToSurfaceHeight.isValid()){
@@ -468,29 +457,97 @@ class StructuralInfo{
     }
   }
   
-  //void _helper1(){
-  //  if(_baseArea() != 0){
-  //    if(_getUseableLength() != 0){
-  //      if(_getBasinDepth() != 0){
-  //        if(_getTotalStructureHeight() != 0){}
-  //        if(_getStaticHead() != 0){}
-  //        if(_getBaseSeaLevel() != 0){}
-  //      }
-  //    }
-  //  }
-  //}
 
-  //void _helper2(){
-  //  if(_getBasinDepth() != 0){
-  //    if(_getTotalStructureHeight() != 0){}
-  //    if(_getStaticHead() != 0){}
-  //    if(_getBaseSeaLevel() != 0){}
-  //  }
-  //}
+  //MAP VALUES
 
-  //void _helper3(){
-  //  if(_getHeightFromInletToSurface() != 0){
-  //    _helper2();
-  //  }
-  //}
+  final String _inflowStr = "inflow";
+  final String _surfaceThicknessStr = "surfaceThickness";
+  final String _baseThicknessStr = "baseThickness";
+  final String _baseInnerDiameterWStr = "baseInnerDiameterW";
+  final String _floorAreaStr = "floorArea";
+  final String _baseWallThicknessStr = "baseWallThickness";
+
+  final String _lowLevelStr = "lowLevel";  //inches
+  final String _lagPumpFloatHeightStr = "lagPumpFloatHeight";  //inches
+  final String _alarmToInletHeightStr = "alarmToInletHeight"; //inches
+  final String _valveBoxWStr = "valveBoxW"; //feet
+  final String _valveBoxHStr = "valveBoxH"; //feet
+
+  final String _inletSeaLevelStr = "inletSeaLevel";  //feet
+  final String _surfaceSeaLevelStr = "surfaceSeaLevel"; //feet
+  final String _pipeOutSeaLevelStr = "pipeOutSeaLevel"; //feet
+  final String _valBoxSeaLevelStr = "valBoxSeaLevel"; //feet
+  final String _baseSeaLevelStr = "baseSeaLevel"; // feet
+  final String _pipeOutBasinSeaLevelStr = "pipeOutBasinSeaLevel";
+  final String _pipeOutToSurfaceHeightStr = "pipeOutToSurfaceHeight";
+
+  final String _useableVolumeHStr = "useableVolumeH";  //feet
+  final String _useableVolumeStr = "useableVolume"; //GALONS
+  final String _basinDepthStr = "basinDepth"; 
+  final String _structureHeightStr = "structureHeight";
+  final String _inletToSurfaceStr = "inletToSurface";
+  final String _staticHeadStr = "staticHead";
+
+  final String _baseShapeStr = "baseShape";
+  final String _valveBoxShapeStr = "valveBoxShape";
+  final String _flexibleHeightStr = "flexibleHeight"; //inches
+
+  Map<String, dynamic> toMap(){
+    return{
+      _inflowStr: inflow,
+      _surfaceThicknessStr: surfaceThickness,
+      _baseThicknessStr: baseThickness,
+      _baseInnerDiameterWStr: baseInnerDiameterW,
+      _floorAreaStr: floorArea,
+      _baseWallThicknessStr: baseWallThickness,
+      _lowLevelStr: lowLevel,  //inches
+      _lagPumpFloatHeightStr: lagPumpFloatHeight,  //inches
+      _alarmToInletHeightStr: alarmToInletHeight, //inches
+      _valveBoxWStr: valveBoxW, //feet
+      _valveBoxHStr: valveBoxH, //feet
+      _inletSeaLevelStr: inletSeaLevel,  //feet
+      _surfaceSeaLevelStr: surfaceSeaLevel, //feet
+      _pipeOutSeaLevelStr: pipeOutSeaLevel, //feet
+      _valBoxSeaLevelStr: valBoxSeaLevel, //feet
+      _baseSeaLevelStr: baseSeaLevel, // feet
+      _pipeOutBasinSeaLevelStr: pipeOutBasinSeaLevel,
+      _pipeOutToSurfaceHeightStr: pipeOutToSurfaceHeight,
+      _useableVolumeHStr: useableVolumeH,  //feet
+      _useableVolumeStr: useableVolume, //GALONS
+      _basinDepthStr: basinDepth, 
+      _structureHeightStr: structureHeight,
+      _inletToSurfaceStr: inletToSurface,
+      _staticHeadStr: staticHead,
+      _baseShapeStr: baseShape,
+      _valveBoxShapeStr: valveBoxShape,
+      _flexibleHeightStr:  flexibleHeight,
+    };
+  }
+
+  void fromMap(Map<String, dynamic> map){
+      inflow = map[_inflowStr];
+      surfaceThickness = map[_surfaceThicknessStr];
+      baseThickness = map[_baseThicknessStr];
+      baseInnerDiameterW = map[_baseInnerDiameterWStr];
+      floorArea = map[_floorAreaStr];
+      baseWallThickness = map[_baseWallThicknessStr];
+      lowLevel = map[_lowLevelStr];  //inches
+      lagPumpFloatHeight = map[_lagPumpFloatHeightStr];  //inches
+      alarmToInletHeight = map[_alarmToInletHeightStr]; //inches
+      valveBoxW = map[_valveBoxWStr]; //feet
+      valveBoxH = map[_valveBoxHStr]; //feet
+      inletSeaLevel = map[_inletSeaLevelStr];  //feet
+      surfaceSeaLevel = map[_surfaceSeaLevelStr]; //feet
+      pipeOutSeaLevel = map[_pipeOutSeaLevelStr]; //feet
+      valBoxSeaLevel = map[_valBoxSeaLevelStr]; //feet
+      baseSeaLevel = map[_baseSeaLevelStr]; // feet
+      pipeOutBasinSeaLevel = map[_pipeOutBasinSeaLevelStr];
+      pipeOutToSurfaceHeight = map[_pipeOutToSurfaceHeightStr];
+      useableVolumeH = map[_useableVolumeHStr];  //feet
+      useableVolume = map[_useableVolumeStr]; //GALONS
+      basinDepth = map[_basinDepthStr]; 
+      structureHeight = map[_structureHeightStr];
+      inletToSurface = map[_inletToSurfaceStr];
+      staticHead = map[_staticHeadStr];
+  }
 }

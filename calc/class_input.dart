@@ -60,6 +60,7 @@ class InputInfo extends ChangeNotifier{
 
   TextEditingController usableVolumeCtrl = TextEditingController();
   TextEditingController lagFloatHeightCtrl = TextEditingController();
+  TextEditingController basinFloorAreaCtrl = TextEditingController(); 
   TextEditingController waterLevelToInletHeightCtrl = TextEditingController();
   TextEditingController inletToSurfaceHeightCtrl = TextEditingController();
   TextEditingController basinDepthCtrl = TextEditingController();
@@ -71,6 +72,7 @@ class InputInfo extends ChangeNotifier{
   TextEditingController hazenCoEfficientCtrl = TextEditingController();
   TextEditingController fittingsToLengthCtrl = TextEditingController();
   TextEditingController totalLengthCtrl = TextEditingController();
+  TextEditingController basinFloorSealevelCtrl = TextEditingController();
   TextEditingController usableVolumeHeightCtrl = TextEditingController();
   TextEditingController pipeOutVelocityCtrl = TextEditingController();
   TextEditingController pumpRecyclingCtrl = TextEditingController();
@@ -217,7 +219,7 @@ class InputInfo extends ChangeNotifier{
 
   void onBasinOutletSeaLevelChange(String value){
     double num = _strToDouble(value);
-    AppController.structInfo.basinOutLetSeaLevel = num;
+    AppController.structInfo.pipeOutBasinSeaLevel = num;
   }
 
   void onLowLevelChange(String value){
@@ -338,6 +340,16 @@ class InputInfo extends ChangeNotifier{
     AppController.structInfo.structureHeight = num;
   }
 
+  void onBasinFloorAreaChange(String value){
+    double num = _strToDouble(value);
+    AppController.structInfo.floorArea = num;
+  }
+
+  void onBasinFloorSealevelChange(String value){
+    double num = _strToDouble(value);
+    AppController.structInfo.baseSeaLevel = num;
+  }
+
   void onStaticHeadChange(String value){
     double num = _strToDouble(value);
     AppController.structInfo.staticHead = num;
@@ -351,6 +363,14 @@ class InputInfo extends ChangeNotifier{
   void onMinPumpStartChange(String value){
     double num = _strToDouble(value);
     AppController.sewageES.minPumpstart = num;
+  }
+
+  //This handler is to be put in the graph.
+  void onMinPumpStartChange2(){
+    double num = _strToDouble(minPumpStartCtrl.text);
+    AppController.sewageES.minPumpstart = num;
+    AppController.sewageES.reCalculate();
+    notifyListeners();
   }
 
   void onPumpRecyclingChange(String value){
@@ -383,7 +403,7 @@ class InputInfo extends ChangeNotifier{
   }
 
   void reCalculateData(){
-    preData();
+
     onInflowchange(inflowCtrl.text);
     onPipeLengthChange(pipeLengthController.text);
     onPipeDiameterChange(pipeDiameterController.text);
@@ -402,7 +422,6 @@ class InputInfo extends ChangeNotifier{
     onValveboxInnerWidthChange(valveboxInnerWidthCtrl.text);
     onValveBoxSeaLevelChange(valveBoxBaseSeaLevelCtrl.text);
     onLowLevelChange(lowLevelCtrl.text);
-
 
     AppController.structInfo.recalculateData();
     AppController.sewageCalc.getEquivalentLength();
@@ -423,6 +442,8 @@ class InputInfo extends ChangeNotifier{
     pumpRecyclingCtrl.text = nf.format(AppController.sewageES.calculatedPumpStart);
     pumpRateCtrl.text = nf.format(AppController.sewageES.pumpRate);
     waterLevelToInletHeightCtrl.text = nf.format(AppController.structInfo.alarmToInletHeight + AppController.structInfo.flexibleHeight);
+    basinFloorSealevelCtrl.text = nf.format(AppController.structInfo.baseSeaLevel);
+    basinFloorAreaCtrl.text = nf.format(AppController.structInfo.floorArea);
   }
 
   //This is for Debugging
@@ -444,6 +465,61 @@ class InputInfo extends ChangeNotifier{
     basinOutSeaLevelCtrl.text = "1193.1";
     valveboxInnerWidthCtrl.text = "1";
     valveBoxBaseSeaLevelCtrl.text = "1191.9";
+  }
+
+  //After reading
+  void preReadJson(){
+    inflowCtrl.text = nf.format(AppController.structInfo.inflow);
+    pipeLengthController.text = nf.format(AppController.sewageCalc.pipeLength);
+    pipeDiameterController.text = nf.format(AppController.sewageCalc.diameter);
+    elbow45Controller.text = nf.format(AppController.sewageCalc.numOf45Elbow);
+    elbow90Controller.text = nf.format(AppController.sewageCalc.numOf90Elbow);
+    gateValveController.text = nf.format(AppController.sewageCalc.numofGateValve);
+    checkValveController.text = nf.format(AppController.sewageCalc.numofCheckValve);
+
+  //fixtureInPutCtrl.text; //Instead
+
+    surfaceThicknessCtrl.text = nf.format(AppController.structInfo.surfaceThickness);
+    basinBaseThicknessCtrl.text = nf.format(AppController.structInfo.baseThickness);
+    baseInnerWidthCtrl.text = nf.format(AppController.structInfo.baseInnerDiameterW);
+    basinWallThicknessCtrl.text = nf.format(AppController.structInfo.baseWallThickness);
+    valveboxInnerWidthCtrl.text = nf.format(AppController.structInfo.valveBoxW);
+
+    inletSeaLevelCtrl.text = nf.format(AppController.structInfo.inletSeaLevel);
+    outletSeaLevelCtrl.text = nf.format(AppController.structInfo.pipeOutSeaLevel);
+    finishedSurfaceSeaLevelCtrl.text = nf.format(AppController.structInfo.surfaceSeaLevel);
+    basinOutSeaLevelCtrl.text = nf.format(AppController.structInfo.pipeOutBasinSeaLevel); //End of pipe output used for static head
+    valveBoxBaseSeaLevelCtrl.text = nf.format(AppController.structInfo.valBoxSeaLevel);
+
+    lowLevelCtrl.text = nf.format(AppController.structInfo.lowLevel);
+    horsePowerCtrl.text = AppController.sewageES.currentPumpModel.hp;
+    voltageCtrl.text = AppController.sewageES.currentPumpModel.voltage;
+    phaseCtrl.text = AppController.sewageES.currentPumpModel.phase;
+    ampsCtrl.text = AppController.sewageES.currentPumpModel.amps;
+    pumpCableLengthCtrl.text = nf.format(AppController.sewageES.cableLength);
+    minPumpStartCtrl.text = nf.format(AppController.sewageES.minPumpstart);
+    locationCtrl.text = AppController.sewageES.location;
+    tagNumCtrl.text = AppController.sewageES.tagNum;
+
+    usableVolumeCtrl.text = nf.format(AppController.structInfo.useableVolume);
+    lagFloatHeightCtrl.text = nf.format(AppController.structInfo.lagPumpFloatHeight);
+    basinFloorAreaCtrl.text = nf.format(AppController.structInfo.floorArea); 
+    waterLevelToInletHeightCtrl.text = nf.format(AppController.structInfo.alarmToInletHeight + AppController.structInfo.flexibleHeight);
+    inletToSurfaceHeightCtrl.text = nf.format(AppController.structInfo.inletToSurface);
+    basinDepthCtrl.text = nf.format(AppController.structInfo.basinDepth);
+    totalStructuralDepthCtrl.text = nf.format(AppController.structInfo.structureHeight);
+    staticHeadCtrl.text = nf.format(AppController.structInfo.staticHead);
+    outPipeToFinishedSurfaceCtrl.text = nf.format(AppController.structInfo.pipeOutToSurfaceHeight);
+    valveBoxDepthCtrl.text = nf.format(AppController.structInfo.valveBoxH);
+
+    hazenCoEfficientCtrl.text = nf.format(AppController.sewageCalc.C);
+    fittingsToLengthCtrl.text = nf.format(AppController.sewageCalc.equivalentPipeLength);
+    totalLengthCtrl.text = nf.format(AppController.sewageCalc.totalLength);
+    basinFloorSealevelCtrl.text = nf.format(AppController.structInfo.baseSeaLevel);
+    usableVolumeHeightCtrl.text = nf.format(AppController.structInfo.useableVolumeH);
+    pipeOutVelocityCtrl.text = nf.format(AppController.sewageES.pipeOutVelocity);
+    pumpRecyclingCtrl.text = nf.format(AppController.sewageES.calculatedPumpStart);
+    pumpRateCtrl.text = nf.format(AppController.sewageES.pumpRate);  
   }
 
 

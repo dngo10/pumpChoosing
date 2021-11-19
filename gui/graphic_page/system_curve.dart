@@ -6,6 +6,8 @@ import 'package:my_app/gui/graphic_page/system_pump_chart.dart';
 import 'package:my_app/gui/plumbing_info/general_input.dart';
 
 class SystemCurve extends StatefulWidget{
+  const SystemCurve({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return _SystemCurve();

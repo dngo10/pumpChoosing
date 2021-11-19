@@ -5,8 +5,11 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:my_app/calc/app_controller.dart';
 
 class PumpFlowRate extends StatefulWidget{
+  const PumpFlowRate({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
+
     return _PumpFlowRate();
   }
 }
@@ -99,7 +102,7 @@ class _PumpFlowRate extends State<PumpFlowRate>{
           charts.LineAnnotationSegment(
             AppController.structInfo.inflow*5/4,
             charts.RangeAnnotationAxisType.domain,
-            startLabel: "4 min",
+            endLabel: "4 min",
             labelDirection: charts.AnnotationLabelDirection.horizontal,
             labelAnchor: charts.AnnotationLabelAnchor.start,
           ),
@@ -111,7 +114,18 @@ class _PumpFlowRate extends State<PumpFlowRate>{
             labelDirection: charts.AnnotationLabelDirection.horizontal,
             labelAnchor: charts.AnnotationLabelAnchor.start,
           ),
-        ])
+        ]),
+        charts.ChartTitle(
+          "pump rate (GPM)",
+          behaviorPosition: charts.BehaviorPosition.bottom,
+          titleOutsideJustification: charts.OutsideJustification.middleDrawArea
+        ),
+
+        charts.ChartTitle(
+          "sump depth (ft)",
+          behaviorPosition: charts.BehaviorPosition.start,
+          titleOutsideJustification: charts.OutsideJustification.middleDrawArea
+        ),
       ],
     );
   }

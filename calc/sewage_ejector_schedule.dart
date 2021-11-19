@@ -150,7 +150,9 @@ class SewageEjectorSechedule{
 
   void getPumpRecyclingTime(){
     if(AppController.structInfo.inflow != 0){
-      calculatedPumpStart = AppController.structInfo.useableVolume/(pumpRate - AppController.structInfo.inflow) + pumpRate/AppController.structInfo.inflow;
+      calculatedPumpStart = AppController.structInfo.useableVolume/
+                          (pumpRate - AppController.structInfo.inflow) + 
+                          pumpRate/AppController.structInfo.inflow;
     }else{
       calculatedPumpStart = 0;
     }

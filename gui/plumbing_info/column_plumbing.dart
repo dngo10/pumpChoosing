@@ -35,7 +35,7 @@ class _ColumnPlumbing extends State<ColumnPlumbing>{
               ),
               PipeMaterial(),
               GeneralInput("ft", "Pipe Length",  AppController.inputInfo.pipeLengthController, "piple length of the plumbing system", AppController.inputInfo.onPipeLengthChange),
-              GeneralInput("in", "Pipe Diameter", AppController.inputInfo.pipeDiameterController, "diameter of out let pipe", AppController.inputInfo.onPipeDiameterChange),
+              GeneralInput("in", "Pipe Diameter", AppController.inputInfo.pipeDiameterController, "diameter of outlet pipe [2, 3, 4, 6, 8, 10, 12, 14, 16]", AppController.inputInfo.onPipeDiameterChange),
 
               Padding(
                 padding: const EdgeInsets.only(top: 20),
@@ -46,6 +46,16 @@ class _ColumnPlumbing extends State<ColumnPlumbing>{
               GeneralInput("unit", "Gate Valve", AppController.inputInfo.gateValveController, "amount of gate valve", AppController.inputInfo.onGateValveChange),
               GeneralInput("unit", "Check Valve", AppController.inputInfo.checkValveController, "amount of check value", AppController.inputInfo.onCheckValveChange),
               DfuToGpm(),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: ElevatedButton(
+                  child: const Text("Example (For Testing)"),
+                  onPressed:() {
+                    AppController.inputInfo.preData();
+                  },
+                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
+                ),
+              )
             ],
           ),
           Column(
@@ -166,13 +176,19 @@ class _ColumnPlumbing extends State<ColumnPlumbing>{
               GeneralInput("", "Hazem William Coefficient", AppController.inputInfo.hazenCoEfficientCtrl, "Hazem William Coefficient Value based on Material", AppController.inputInfo.onHazemWilliamCofficientChange),
               GeneralInput("ft", "fittings equiv to length", AppController.inputInfo.fittingsToLengthCtrl, "Convert all fittings to length", AppController.inputInfo.onFittingsEquivToLengthChange),
               GeneralInput("ft", "total pipe length", AppController.inputInfo.totalLengthCtrl, "Equals to pipe length + fittings equivalent length", AppController.inputInfo.onTotalPipeLengthChange),
+              
+              GeneralInput("sqft", "[T] Basin Area", AppController.inputInfo.basinFloorAreaCtrl, "Basin Area", AppController.inputInfo.onBasinFloorAreaChange),
+              
               GeneralInput("gal", "[D] Useable Volume", AppController.inputInfo.usableVolumeCtrl, "Useable Volume Calculate from LowLevel float to basin water level when full", AppController.inputInfo.onUseableVolumeChange),
-              GeneralInput("gal", "[D] Useable Volume Height", AppController.inputInfo.usableVolumeHeightCtrl, "Height of Usable Volume", AppController.inputInfo.onUseableVolumeHeightChange),
+              GeneralInput("ft", "[D] Useable Volume Height", AppController.inputInfo.usableVolumeHeightCtrl, "Height of Usable Volume", AppController.inputInfo.onUseableVolumeHeightChange),
               GeneralInput("in", "[E] lag float  ↔ water level", AppController.inputInfo.lagFloatHeightCtrl, "Distance from lag pump float to water level", AppController.inputInfo.onLagToWaterLevelChange),
-              GeneralInput("in", "[F] water level  ↔ inlet", AppController.inputInfo.waterLevelToInletHeightCtrl, "Distance from basin water level to bottom of pipe inlet", AppController.inputInfo.onWaterLevelToInlet),
+              GeneralInput("in", "[F] water level  ↔ inlet (>2)", AppController.inputInfo.waterLevelToInletHeightCtrl, "Distance from basin water level to bottom of pipe inlet", AppController.inputInfo.onWaterLevelToInlet),
               GeneralInput("in", "[H] inlet  ↔ surface", AppController.inputInfo.inletToSurfaceHeightCtrl, "Distance from bottom of pipe inlet to surface", AppController.inputInfo.onInlettoSuraceHeightChange),
               GeneralInput("ft", "[M] depth basin", AppController.inputInfo.basinDepthCtrl, "Depth basin", AppController.inputInfo.onDepthBasinChange),
               GeneralInput("ft", "[S] total structure height", AppController.inputInfo.totalStructuralDepthCtrl, "Depth included the thickness of basin base to surface", AppController.inputInfo.onTotalStructureHeightChange),
+              
+              GeneralInput("ft", "[T] Basin Floor Sealevel", AppController.inputInfo.basinFloorSealevelCtrl, "Basin floor Sea Level", AppController.inputInfo.onBasinFloorAreaChange),
+              
               GeneralInput("ft", "[R] static head", AppController.inputInfo.staticHeadCtrl, "Static Head", AppController.inputInfo.onStaticHeadChange),
               GeneralInput("ft", "[K] out pipe to finished surface", AppController.inputInfo.outPipeToFinishedSurfaceCtrl, "Distance from pipe just going out of basin to surface", AppController.inputInfo.onOutPipeToSurfaceChange),
               GeneralInput("in", "[O] valve box depth", AppController.inputInfo.valveBoxDepthCtrl, "Valve Box Depth", AppController.inputInfo.onValveBoxDepthChange),
