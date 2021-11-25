@@ -42,19 +42,19 @@ class SewageEjectorSechedule{
   //This curve is for 1 2 4 5 min graph
   Map<double, double> pumpRateCurve = {};
 
-  final _sewageTypeStr = "SewageType";
-  final _tagNumStr = "TagNum";
-  final _locationStr = "Location";
-  final _basinDimensionStr = "BasinDimension";
-  final _manufactureStr = "Manufacture";
+  final _sewageTypeStr = "sewageType";
+  final _tagNumStr = "tagNum";
+  final _locationStr = "location";
+  final _basinDimensionStr = "basinDimension";
+  final _manufactureStr = "manufacture";
   final _currentPumpSeriesStr = "currentPumpSeries";
   final _currentPumpModelStr = "currentPumpModel";
   final _pumpRateStr = "pumpRate";
-  final _hnStr = "hnStr";
+  final _hnStr = "hn";
   final _typePumpStr = "typePump";
-  final _cableLengthStr = "CableLength";
-  final _minPumpstartStr = "MinPumpstart";
-  final _calculatedPumpStartStr = "CalculatedPumpStart";
+  final _cableLengthStr = "cableLength";
+  final _minPumpstartStr = "minPumpstart";
+  final _calculatedPumpStartStr = "calculatedPumpStart";
   final _pipeOutVelocityStr = "pipeOutVelocity";
   final _currentImpellerDiaStr = "currentImpellerDia";
 

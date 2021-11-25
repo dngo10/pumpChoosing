@@ -35,7 +35,9 @@ class _GraphicPage extends State<GraphicPage>{
           ]
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: (){},
+          onPressed: (){
+            AppController.submitData();
+          },
           child: const Icon(Icons.exit_to_app),
         ),
       ),

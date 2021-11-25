@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -24,6 +25,7 @@ class AppController{
   static const _uuid = "Uuid";
   static bool isEditing = false;
   static String uuid = "";
+  static Key key = GlobalKey();
 
 
   static const _structInfoStr = "structInfo";
@@ -53,9 +55,11 @@ class AppController{
       uuid = const Uuid().v4();
     }
 
+    Map<String, dynamic> mp = toMap();
+
     Map<String, dynamic> map = {
       _uuid: uuid,
-      _data : json.encode(toMap())
+      _data : json.encode(mp)
     };
 
     return  json.encode(map);
@@ -72,22 +76,23 @@ class AppController{
     fromMap(dataMap);
   }
 
-  static submitData(String json) async{
-    if(isEditing){
-      http.post(
-        Uri.parse(url + "/edit"),
-        body: json,
-        headers: <String,String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        }
-      ).then((value){
-        if(value.statusCode > 300){
-          print("Failed -- Status Code: ${value.statusCode}");
-        }else{
+  static submitData() async{
+    String json = toJson();
+    http.post(
+      Uri.parse(url + "/edit"),
+      body: json,
+      headers: <String,String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      }
+    ).then((value){
+      if(value.statusCode > 300){
+        print("Failed -- Status Code: ${value.statusCode}");
+      }else{
+        Clipboard.setData(ClipboardData(text: json)).then((value){
           exit(0);
-        }
-      });
-    }
+        });
+      }
+    });
   }
 
   static readData() async{

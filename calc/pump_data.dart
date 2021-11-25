@@ -437,8 +437,8 @@ class Impeller{
   double impellerDia = 0;
   Map<double,double> feetGal = {};
 
-  String impellerDiaStr = "impellerDia";
-  String feetGalStr = "feetGal";
+  final String _impellerDiaStr = "impellerDia";
+  final String _feetGalStr = "feetGal";
 
   Impeller();
 
@@ -453,13 +453,13 @@ class Impeller{
 
   Map<String, dynamic> toMap(){
     return {
-      impellerDiaStr : impellerDia,
-      feetGalStr : feetGal
+      _impellerDiaStr : impellerDia,
+      //_feetGalStr : feetGal
     };
   }
 
   Impeller? fromMap(Map<String, dynamic> map, Pump pump){
-    impellerDia = map[impellerDiaStr];
+    impellerDia = map[_impellerDiaStr];
     for (var element in pump.impellerList) {
       if(impellerDia == element.impellerDia){
         return element;
