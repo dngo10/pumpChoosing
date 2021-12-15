@@ -31,14 +31,8 @@ class _GraphicPage extends State<GraphicPage>{
         body: TabBarView(
           children: [
             PumpFlowRateChart(),
-            SystemCurve(key: AppController.key),
+            SystemCurve(),
           ]
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: (){
-            AppController.submitData();
-          },
-          child: const Icon(Icons.exit_to_app),
         ),
       ),
     )

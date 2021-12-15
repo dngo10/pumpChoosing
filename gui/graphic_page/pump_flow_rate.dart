@@ -148,10 +148,16 @@ class ListChartSeries{
     min5.clear();
     pumpRate.clear();
 
+    if(AppController.sewageES.pumpRateCurve.isEmpty){
+      return;
+    }
+
     AppController.sewageES.pumpRateCurve.forEach((key, value) {
       DataSeries ds = DataSeries(key, value, charts.ColorUtil.fromDartColor(Colors.blue));
       pumpRate.add(ds);
     });
+
+
 
     double maxValue = max(AppController.sewageES.pumpRateCurve.values.first, AppController.sewageES.pumpRateCurve.values.last) + 4;
     double qf = AppController.structInfo.inflow;

@@ -16,7 +16,7 @@ class SewageEjectorCalculation{
   double totalLength = 0;
 
   double getEquivalentLength(){
-    equivalentPipeLength = numOf45Elbow*UnitConvert.elbow45[diameter]! +
+    equivalentPipeLength = numOf45Elbow*(UnitConvert.elbow45[diameter]!) +
            numOf90Elbow*UnitConvert.elbow90[diameter]! +
            numofCheckValve*UnitConvert.backWaterValve[diameter]! +
            numofGateValve*UnitConvert.gateValve[diameter]!;

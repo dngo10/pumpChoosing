@@ -363,20 +363,20 @@ class Pump{
   }
 
   Pump? fromMap(Map<String, dynamic> map){
-    brand = map[_brandStr];
-    model = map[_modelStr];
-    lowlevel = map[_lowLevelStr];
-    type = map[_typeStr];
+    String brand1 = map[_brandStr];
+    String model1 = map[_modelStr];
+    //lowlevel = map[_lowLevelStr];
+    //type = map[_typeStr];
 
-    subModels.clear();
-    impellerList.clear();
+    //subModels.clear();
+    //impellerList.clear();
 
     for(Pump pump in AppController.pumpData.pumpList){
-      if(pump.brand == brand && model == pump.model){
+      if(brand1 == pump.brand && model1 == pump.model){
         return pump;
       }
     }
-    return null;
+    return this;
   }
 }
 
@@ -409,19 +409,19 @@ class PumpElectricDetails{
   }
 
   PumpElectricDetails? fromMap(Map<String, dynamic> map, Pump currentPump){
-    model = map[_modelStr];
-    hp = map[_hpStr];
-    voltage = map[_voltageStr];
-    phase = map[_phaseStr];
-    amps = map[_ampsStr];
+    //model = map[_modelStr];
+    //hp = map[_hpStr];
+    //voltage = map[_voltageStr];
+    //phase = map[_phaseStr];
+    //amps = map[_ampsStr];
 
     for (var item in currentPump.subModels) {
-      if(model == item.model){
+      if(item.model == map[_modelStr]){
         return item;
       }
     }
 
-    return null;
+    return this;
   }
 
   void copy(PumpElectricDetails eDetails){
@@ -459,12 +459,13 @@ class Impeller{
   }
 
   Impeller? fromMap(Map<String, dynamic> map, Pump pump){
-    impellerDia = map[_impellerDiaStr];
+    //impellerDia = map[_impellerDiaStr];
+    double tempDia = map[_impellerDiaStr];
     for (var element in pump.impellerList) {
-      if(impellerDia == element.impellerDia){
+      if(element.impellerDia == tempDia){
         return element;
       }
     }
-    return null;
+    return this;
   }
 }

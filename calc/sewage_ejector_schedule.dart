@@ -89,7 +89,7 @@ class SewageEjectorSechedule{
     typePump = map[_typePumpStr];
     cableLength = map[_cableLengthStr];
     minPumpstart = map[_minPumpstartStr];
-    calculatedPumpStart = map[calculatedPumpStart];
+    calculatedPumpStart = map[_calculatedPumpStartStr]!;
     pipeOutVelocity = map[_pipeOutVelocityStr];
     pumpRate = map[_pumpRateStr];
     hn = map[_hnStr];
@@ -123,7 +123,12 @@ class SewageEjectorSechedule{
           AppController.structInfo.alarmToInletHeight +
           AppController.structInfo.flexibleHeight
         );
-    maxY = maxY.ceil().toDouble();
+    if(maxY.isNaN || maxY.isInfinite){
+      maxY = 0;
+    }else{
+      maxY = maxY.ceil().toDouble();
+    }
+
     
     for(double i = sumDepth; i <= maxY; i+=0.5){
       double useableVolumeHeight =
@@ -245,12 +250,13 @@ class SewageType{
   }
 
   SewageType? fromMap(Map<String, dynamic> map){
-    name = map[_nameStr];
-    tag = map[_tagStr];
+    String name1 = map[_nameStr];
+    String tag1 = map[_tagStr];
     for (var element in AppController.sewageES.sewageTypeList) {
-      if(element.name == name && element.tag == tag){
+      if(element.name == name1 && element.tag == tag1){
         return element;
       }
     }
+    return this;
   }
 }

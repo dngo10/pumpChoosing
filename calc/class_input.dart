@@ -24,6 +24,7 @@ class InputInfo extends ChangeNotifier{
     phaseCtrl.text = AppController.sewageES.currentPumpModel.phase;
     tagNumCtrl.text = AppController.sewageES.tagNum;
     minPumpStartCtrl.text = nf.format(AppController.sewageES.minPumpstart);
+    pipeDiameterController.text = nf.format(AppController.sewageCalc.diameter);
   }
 
   TextEditingController inflowCtrl = TextEditingController();
@@ -422,6 +423,8 @@ class InputInfo extends ChangeNotifier{
     onValveboxInnerWidthChange(valveboxInnerWidthCtrl.text);
     onValveBoxSeaLevelChange(valveBoxBaseSeaLevelCtrl.text);
     onLowLevelChange(lowLevelCtrl.text);
+    
+    onPumpCableLengthChange(pumpCableLengthCtrl.text);
 
     AppController.structInfo.recalculateData();
     AppController.sewageCalc.getEquivalentLength();
@@ -465,6 +468,7 @@ class InputInfo extends ChangeNotifier{
     basinOutSeaLevelCtrl.text = "1193.1";
     valveboxInnerWidthCtrl.text = "1";
     valveBoxBaseSeaLevelCtrl.text = "1191.9";
+    pumpCableLengthCtrl.text = "75";
   }
 
   //After reading
@@ -520,6 +524,10 @@ class InputInfo extends ChangeNotifier{
     pipeOutVelocityCtrl.text = nf.format(AppController.sewageES.pipeOutVelocity);
     pumpRecyclingCtrl.text = nf.format(AppController.sewageES.calculatedPumpStart);
     pumpRateCtrl.text = nf.format(AppController.sewageES.pumpRate);  
+
+    onWaterTypeChange(AppController.sewageES.sewageType);
+    onBasinShapeChange(AppController.structInfo.baseShape);
+    onMaterialTypeChange(AppController.sewageCalc.material);
   }
 
 

@@ -88,31 +88,34 @@ class SystemPumpChart extends StatelessWidget{
 
     
 
-    return charts.LineChart(
-      series,
-      animate: false,
-      defaultRenderer: charts.LineRendererConfig(includePoints: false),
-      behaviors: [
-        charts.RangeAnnotation([
-          ...anotation
-        ]
-        ),
-        charts.ChartTitle(
-          "feet",
-          behaviorPosition: charts.BehaviorPosition.start,
-        ),
-        charts.ChartTitle(
-          "gpm",
-          behaviorPosition: charts.BehaviorPosition.bottom,
-          
-        ),
-      ],
-      customSeriesRenderers: [
-        charts.PointRendererConfig(
-          customRendererId: 'dots'
-        )
-      ],
+    return RepaintBoundary(
+      key: AppController.key,
+      child: charts.LineChart(
+        series,
+        animate: false,
+        defaultRenderer: charts.LineRendererConfig(includePoints: false),
+        behaviors: [
+          charts.RangeAnnotation([
+            ...anotation
+          ]
+          ),
+          charts.ChartTitle(
+            "feet",
+            behaviorPosition: charts.BehaviorPosition.start,
+          ),
+          charts.ChartTitle(
+            "gpm",
+            behaviorPosition: charts.BehaviorPosition.bottom,
+            
+          ),
+        ],
+        customSeriesRenderers: [
+          charts.PointRendererConfig(
+            customRendererId: 'dots'
+          )
+        ],
 
+      ),
     );
   } 
 

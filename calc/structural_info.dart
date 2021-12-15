@@ -546,8 +546,10 @@ class StructuralInfo{
       useableVolumeH = map[_useableVolumeHStr];  //feet
       useableVolume = map[_useableVolumeStr]; //GALONS
       basinDepth = map[_basinDepthStr]; 
+      baseShape = map[_baseShapeStr];
       structureHeight = map[_structureHeightStr];
       inletToSurface = map[_inletToSurfaceStr];
       staticHead = map[_staticHeadStr];
+      flexibleHeight = map[_flexibleHeightStr];
   }
 }

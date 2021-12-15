@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_app/calc/app_controller.dart';
 import 'package:my_app/gui/graphic_page/graphic_page_main.dart';
 import 'package:my_app/gui/plumbing_info/column_plumbing.dart';
 
 class TopTab extends StatefulWidget{
+  
+
   @override
   State<StatefulWidget> createState() {
     return _TopTab();
@@ -11,6 +14,14 @@ class TopTab extends StatefulWidget{
 }
 
 class _TopTab extends State<TopTab>{
+  @override
+  void initState() {
+    super.initState();
+
+    AppController.readData();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return  
@@ -30,6 +41,7 @@ class _TopTab extends State<TopTab>{
         ]),
         floatingActionButton: FloatingActionButton(
           onPressed: (){
+            AppController.inputInfo.reCalculateData();
             Navigator.push(
               context, 
               MaterialPageRoute(builder: (context) => GraphicPage())

@@ -68,7 +68,11 @@ class _SystemCurve extends State<SystemCurve>{
             ],
           ),
         ),
-        Expanded(child: SystemPumpChart(),)
+        Expanded(child: SystemPumpChart(),),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FloatingActionButton(onPressed: (){AppController.submitData();}, child: const Icon(Icons.exit_to_app)),
+        )
       ],
     );
   }

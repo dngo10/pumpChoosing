@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -11,6 +13,8 @@ import 'package:my_app/calc/sewage_ejector_calculation.dart';
 import 'package:my_app/calc/sewage_ejector_schedule.dart';
 import 'package:my_app/calc/structural_info.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:ui' as ui;
+import 'package:path_provider/path_provider.dart' as sys_paths;
 
 class AppController{
   static PumpData pumpData = PumpData();
@@ -18,6 +22,8 @@ class AppController{
   static SewageEjectorSechedule sewageES = SewageEjectorSechedule();
   static SewageEjectorCalculation sewageCalc = SewageEjectorCalculation();
   static InputInfo inputInfo = InputInfo();
+  static String imagePath = "";
+
 
   static String url = "https://service9.de/api/data";
   static Uri uri =  Uri.parse(url);
@@ -25,18 +31,20 @@ class AppController{
   static const _uuid = "Uuid";
   static bool isEditing = false;
   static String uuid = "";
-  static Key key = GlobalKey();
+  static final GlobalKey key = GlobalKey();
 
 
   static const _structInfoStr = "structInfo";
   static const _sewageESStr = "sewageES";
   static const _sewageCalcStr = "sewageCalc";
+  static const _imagePath = "imagePath";
 
   static Map<String,dynamic> toMap(){
     return {
       _structInfoStr : structInfo.toMap(),
       _sewageESStr : sewageES.toMap(),
       _sewageCalcStr : sewageCalc.toMap(),
+      _imagePath : imagePath
     };
   }
 
@@ -69,7 +77,7 @@ class AppController{
     
     isEditing = true;
 
-    Map<String,String> map = jsonDecode(json) as Map<String, String>;
+    Map<String,dynamic> map = jsonDecode(json) as Map<String, dynamic>;
     uuid = map[_uuid] as String;
     String mapString = map[_data] as String;
     Map<String, dynamic> dataMap = jsonDecode(mapString) as Map<String, dynamic>;
@@ -77,22 +85,48 @@ class AppController{
   }
 
   static submitData() async{
+
+    //THIS UUID IS FOR THE IMAGE.
+    var uuid1 = Uuid();
+    String v4_1 = uuid1.v4();
+    await sys_paths.getTemporaryDirectory().then((value){
+      imagePath = '${value.path}\\chart_image_$v4_1.png';
+    });
+    
     String json = toJson();
-    http.post(
-      Uri.parse(url + "/edit"),
-      body: json,
-      headers: <String,String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      }
-    ).then((value){
-      if(value.statusCode > 300){
-        print("Failed -- Status Code: ${value.statusCode}");
+      if(isEditing){
+        http.post(
+          Uri.parse(url + "/edit"),
+          body: json,
+          headers: <String,String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          }
+        ).then((value){
+          if(value.statusCode > 300){
+            print("Failed -- Status Code: ${value.statusCode}");
+          }else{
+            Clipboard.setData(ClipboardData(text: json)).then((value) async{
+              await printIt(key, v4_1);
+            });
+          }
+        });
       }else{
-        Clipboard.setData(ClipboardData(text: json)).then((value){
-          exit(0);
+        http.post(
+          Uri.parse(url),
+          body: json,
+          headers: <String,String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          }
+        ).then((value){
+          if(value.statusCode > 300){
+            print("Failed -- Status Code: ${value.statusCode}");
+          }else{
+            Clipboard.setData(ClipboardData(text: json)).then((value) async {
+              await(printIt(key, v4_1));
+            });
+          }
         });
       }
-    });
   }
 
   static readData() async{
@@ -112,6 +146,41 @@ class AppController{
     }
   }
 
+  //PRINT AND EXIT, CAN"T PLACE EXIT OUTSITE THE PRINT.
+  static Future<int> printIt(GlobalKey key, String v4) async{
+    try {
+      print('inside');
+      RenderRepaintBoundary boundary =
+          key.currentContext?.findRenderObject() as RenderRepaintBoundary;
+
+      await boundary.toImage(pixelRatio: 4.0).then((value){
+        ui.Image image = value;
+        image.toByteData(format: ui.ImageByteFormat.png).then((value){
+            ByteData? byteData = value;
+            final imageBytes = byteData!.buffer.asUint8List();
+            sys_paths.getTemporaryDirectory().then((value){
+              Directory directory = value;
+              File('${directory.path}\\chart_image_$v4.png').create().then((value){
+                File file = value;
+                imagePath = file.path;
+                file.writeAsBytes(imageBytes).then((value){
+                  exit(0);
+                }  
+                );
+              });
+            });
+        });
+      });
+
+      return 1;
+    } catch (e) {
+      print(e);
+      await File("err.txt").writeAsString(e.toString());
+      return 0;
+    } 
+  }
+
   static List<String> flushOrTank = ["tank", "flush"];
+  static bool isPrintable = false;
 
 }
